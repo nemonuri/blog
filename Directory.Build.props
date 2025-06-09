@@ -5,6 +5,7 @@
 
     <NugetPropsDirectory>$(MSBuildThisFileDirectory)res/nuget-props/</NugetPropsDirectory>
     <DocDirectory>$(MSBuildThisFileDirectory)doc/</DocDirectory>
+    <SiteDirectory>$(MSBuildThisFileDirectory).site/</SiteDirectory>
 
   </PropertyGroup>
 </Project>

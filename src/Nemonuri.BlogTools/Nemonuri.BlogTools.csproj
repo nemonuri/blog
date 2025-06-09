@@ -17,5 +17,9 @@
       <Link>doc/%(RecursiveDir)%(Filename)%(Extension)</Link>
     </None>
   </ItemGroup>
+  
+  <ItemGroup>
+    <AssemblyMetadata Include="SiteDirectory" Value="$(SiteDirectory)" />
+  </ItemGroup>
 
 </Project>
