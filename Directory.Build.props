@@ -1,0 +1,10 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))"
+          Condition="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../')) != ''" />
+  <PropertyGroup>
+
+    <NugetPropsDirectory>$(MSBuildThisFileDirectory)res/nuget-props/</NugetPropsDirectory>
+    <DocDirectory>$(MSBuildThisFileDirectory)doc/</DocDirectory>
+
+  </PropertyGroup>
+</Project>
