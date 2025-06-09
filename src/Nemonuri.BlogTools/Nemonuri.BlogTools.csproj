@@ -12,7 +12,10 @@
   <!-- /NugetProps -->
   
   <ItemGroup>
-    <None Include="$(DocDirectory)**/*.md" />
+    <None Include="$(DocDirectory)**/*.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>doc/%(RecursiveDir)%(Filename).%(Extension)</Link>
+    </None>
   </ItemGroup>
 
 </Project>
