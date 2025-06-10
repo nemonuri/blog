@@ -13,7 +13,7 @@ public struct ContentCardConfigRawData
 
     public string? Category;
 
-    public string? RelativePath;
+    public string? RelativeHtmlPath;
 
     public string? ErrorMessage;
 }

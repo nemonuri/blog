@@ -2,6 +2,8 @@ using AngleSharp;
 using AngleSharp.Dom;
 using AngleSharp.Html;
 using AngleSharp.Html.Dom;
+using Markdig;
+using Markdig.Syntax;
 
 namespace Nemonuri.BlogTools;
 
@@ -9,20 +11,10 @@ public static class HtmlTheory
 {
     public static string CreateIndexHtml(IEnumerable<ContentCardConfigRawData>? contentCardConfigs = null)
     {
-        IBrowsingContext context = BrowsingContext.New();
-        string basicHtmlText = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "html-template", "basic.html"));
-        IDocument document = context.OpenAsync(req => req.Content(basicHtmlText)).Result;
+        IDocument document = CreateBasicHtmlDocument();
+        document.SetRootLanguageAsKorean();
 
         document.Title = "네모누리의 블로그";
-
-        //--- 언어를 한국어로 설정 ---
-        {
-            if (document.DocumentElement is IHtmlHtmlElement htmlElement)
-            {
-                htmlElement.SetAttribute(null, AttributeNames.Lang, "ko-kr");
-            }
-        }
-        //---|
 
         //--- h1 라벨 추가 ---
         {
@@ -43,7 +35,7 @@ public static class HtmlTheory
                     var title = document.CreateDiv();
                     {
                         var a = document.CreateA();
-                        a.Href = contentCardConfig.RelativePath ?? "";
+                        a.Href = contentCardConfig.RelativeHtmlPath ?? "";
                         a.TextContent = contentCardConfig.Title ?? "(No Title)";
 
                         title.AppendChild(a);
@@ -78,10 +70,45 @@ public static class HtmlTheory
         }
         //---|
 
-        var formatter = new PrettyMarkupFormatter();
-        string result = document.ToHtml(formatter);
+        string result = document.ToPrettyFormattedHtml();
 
         return result;
+    }
+
+    public static string CreateBlogPostHtml
+    (
+        MarkdownDocument markdownDocument,
+        MarkdownPipeline? pipeline,
+        string? subTitle
+    )
+    {
+        IDocument document = CreateBasicHtmlDocument();
+        document.SetRootLanguageAsKorean();
+
+        document.Title = string.Concat("네모누리의 블로그", " - ", subTitle ?? "No Title");
+
+        string mdToHtml = markdownDocument.ToHtml(pipeline);
+
+        if (document.Body is { } body)
+        {
+            body.InnerHtml = mdToHtml;
+        }
+
+        string result = document.ToPrettyFormattedHtml();
+
+        return result;
+    }
+
+    private static IDocument? _basicHtmlDocument;
+    public static IDocument CreateBasicHtmlDocument()
+    {
+        if (_basicHtmlDocument is null)
+        {
+            IBrowsingContext context = BrowsingContext.New();
+            string basicHtmlText = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "html-template", "basic.html"));
+            _basicHtmlDocument = context.OpenAsync(req => req.Content(basicHtmlText)).Result;
+        }
+        return (IDocument)_basicHtmlDocument.Clone(deep: true);
     }
 
     public static IHtmlMetaElement CreateMetaElementAndAppendToHead(this IDocument document)
@@ -96,6 +123,22 @@ public static class HtmlTheory
         return document.CreateElement(TagNames.Meta) is IHtmlMetaElement metaElement
             ? metaElement
             : throw new InvalidOperationException($"Cannot get {nameof(IHtmlMetaElement)}");
+    }
+
+    public static void SetRootLanguageAsKorean(this IDocument document) => document.SetRootLanguage("ko-kr");
+
+    public static void SetRootLanguage(this IDocument document, string languageTag)
+    {
+        if (document.DocumentElement is IHtmlHtmlElement htmlElement)
+        {
+            htmlElement.SetAttribute(null, AttributeNames.Lang, languageTag);
+        }
+    }
+
+    private static IMarkupFormatter? _prettyFormatter;
+    public static string ToPrettyFormattedHtml(this IDocument document)
+    {
+        return document.ToHtml(_prettyFormatter ??= new PrettyMarkupFormatter());
     }
 
     public static IHtmlDivElement CreateDiv(this IDocument document) => (IHtmlDivElement)document.CreateElement(TagNames.Div);
