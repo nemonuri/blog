@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Markdig;
+using Nemonuri.BlogTools;
 
 MarkdownPipeline pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
 
@@ -10,7 +11,12 @@ if (siteDirectory.Exists) { siteDirectory.Delete(recursive: true); }
 siteDirectory.Create();
 
 //--- Create index.html ---
+FileInfo indexHtmlFile = new FileInfo(Path.Combine(siteDirectory.FullName, "index.html"));
+indexHtmlFile.GetParentDirectoryIfNotExists()?.Create();
+File.WriteAllText(indexHtmlFile.FullName, HtmlTheory.CreateIndexHtml());
 //---|
+
+return;
 
 foreach (FileInfo file in docDirectory.EnumerateFiles("*.md", SearchOption.AllDirectories))
 {

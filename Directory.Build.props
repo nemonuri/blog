@@ -4,6 +4,7 @@
   <PropertyGroup>
 
     <NugetPropsDirectory>$(MSBuildThisFileDirectory)res/nuget-props/</NugetPropsDirectory>
+    <HtmlTemplateDirectory>$(MSBuildThisFileDirectory)res/html-template/</HtmlTemplateDirectory>
     <DocDirectory>$(MSBuildThisFileDirectory)doc/</DocDirectory>
     <SiteDirectory>$(MSBuildThisFileDirectory).site/</SiteDirectory>
 
