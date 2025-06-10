@@ -59,7 +59,7 @@ public static class HtmlTheory
                 }
                 {
                     var date = document.CreateDiv();
-                    date.TextContent = contentCardConfig.Date == default ? contentCardConfig.Date.ToString("yyyy-MM-dd") : "(No Date)";
+                    date.TextContent = contentCardConfig.Date != default ? contentCardConfig.Date.ToString("yyyy-MM-dd") : "(No Date)";
 
                     contentCard.AppendChild(date);
                 }
