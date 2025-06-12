@@ -5,8 +5,13 @@
 
     <NugetPropsDirectory>$(MSBuildThisFileDirectory)res/nuget-props/</NugetPropsDirectory>
     <HtmlTemplateDirectory>$(MSBuildThisFileDirectory)res/html-template/</HtmlTemplateDirectory>
-    <DocDirectory>$(MSBuildThisFileDirectory)doc/</DocDirectory>
-    <SiteDirectory>$(MSBuildThisFileDirectory).site/</SiteDirectory>
+    <BlogContentDirectory>$(MSBuildThisFileDirectory)blog-content/</BlogContentDirectory>
+    <SiteDirectory>$(MSBuildThisFileDirectory)artifact/_site/</SiteDirectory>
 
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <UseArtifactsOutput>true</UseArtifactsOutput>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)artifact/dotnet</ArtifactsPath>
   </PropertyGroup>
 </Project>
