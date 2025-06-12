@@ -4,6 +4,7 @@ using Markdig.Extensions.Yaml;
 using Markdig.Syntax;
 using Nemonuri.BlogTools;
 using YamlDotNet.Serialization;
+using System.Text.RegularExpressions;
 
 //--- Arrage ---
 MarkdownPipeline pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().UseYamlFrontMatter().Build();
@@ -13,10 +14,10 @@ IDeserializer yamlDeserializer;
     yamlDeserializer = new StaticDeserializerBuilder(context).Build();
 }
 ContentCardConfigRawDataComparer contentCardConfigRawDataComparer = new();
-DirectoryInfo docDirectory = new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "doc"));
+DirectoryInfo blogContentDirectory = new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, Constants.BlogContent));
 //---|
 
-//--- Initialize .site directory ---
+//--- Initialize _site directory ---
 DirectoryInfo siteDirectory;
 { 
     siteDirectory = GetSiteDirectory();
@@ -27,8 +28,8 @@ DirectoryInfo siteDirectory;
 //---|
 
 //--- Create and sort ContentCardConfigRawData collection ---
-var contentCardConfigAndMarkdownDocumentPairs = EnumerateMarkdownDocuments(docDirectory, pipeline)
-    .Select(p => (ContentCardConfigRawData: GetContentCardConfig(docDirectory, p.FileInfo, p.MarkdownDocument, yamlDeserializer), MarkdownDocument: p.MarkdownDocument));
+var contentCardConfigAndMarkdownDocumentPairs = EnumerateMarkdownDocuments(blogContentDirectory, pipeline)
+    .Select(p => (ContentCardConfigRawData: GetContentCardConfig(blogContentDirectory, p.IndexMdFile, p.MarkdownDocument, yamlDeserializer), MarkdownDocument: p.MarkdownDocument));
 
 var contentCardConfigs = contentCardConfigAndMarkdownDocumentPairs
     .Select(p => p.ContentCardConfigRawData)
@@ -67,13 +68,13 @@ static DirectoryInfo GetSiteDirectory()
     return new DirectoryInfo(siteDirectory);
 }
 
-static IEnumerable<(FileInfo FileInfo, MarkdownDocument MarkdownDocument)> EnumerateMarkdownDocuments
+static IEnumerable<(FileInfo IndexMdFile, MarkdownDocument MarkdownDocument)> EnumerateMarkdownDocuments
 (
     DirectoryInfo rootDirectory,
     MarkdownPipeline? pipeline
 )
 {
-    foreach (FileInfo file in rootDirectory.EnumerateFiles("*.md", SearchOption.AllDirectories))
+    foreach (FileInfo file in rootDirectory.EnumerateFiles("index.md", SearchOption.AllDirectories))
     {
         string markDownText = File.ReadAllText(file.FullName);
 
@@ -86,33 +87,73 @@ static IEnumerable<(FileInfo FileInfo, MarkdownDocument MarkdownDocument)> Enume
 static ContentCardConfigRawData GetContentCardConfig
 (
     DirectoryInfo rootDirectory,
-    FileInfo markdownFile,
+    FileInfo indexMdFile,
     MarkdownDocument markdownDocument,
     IDeserializer yamlDeserializer
 )
 {
-    string relativeMarkdownPath = Path.GetRelativePath(relativeTo: rootDirectory.FullName, path: markdownFile.FullName);
+    string relativeMarkdownPath = Path.GetRelativePath(relativeTo: rootDirectory.FullName, path: indexMdFile.FullName);
 
     if (markdownDocument.OfType<YamlFrontMatterBlock>().FirstOrDefault() is not { } yamlBlock)
     {
-        return new ContentCardConfigRawData() { ErrorMessage = $"Cannot find {nameof(YamlFrontMatterBlock)} in {relativeMarkdownPath}" };
+        return new () { ErrorMessage = $"Cannot find {nameof(YamlFrontMatterBlock)} in {relativeMarkdownPath}" };
     }
 
-    YamlFrontMatterRawData yfm;
+    DiaryYamlFrontMatterRawData diaryYfm;
     {
         var yamlString = yamlBlock.Lines.ToString();
-        yfm = yamlDeserializer.Deserialize<YamlFrontMatterRawData>(yamlString);
+        diaryYfm = yamlDeserializer.Deserialize<DiaryYamlFrontMatterRawData>(yamlString);
     }
 
-    var relativeHtmlPath = FileExtensionTheory.ChangeExtension(relativeMarkdownPath, ".html");
+    //--- Parse directory name ---
+    DateTime date = default;
+    string? title = null;
+    {
+        var regex = RegexTheory.GetDiaryNameRegex();
+        if (indexMdFile.Directory?.Name is not { } diaryName)
+        {
+            return new() { ErrorMessage = $"Cannot find parent directory of {relativeMarkdownPath}" };
+        }
+
+        var match = regex.Match(diaryName);
+        if (!match.Success)
+        {
+            return new() { ErrorMessage = $"Cannot parse parent directory name of {relativeMarkdownPath}. Invalid format. ({diaryName})" };
+        }
+
+        date = DateTime.TryParse(match.Groups["Date"].Value, out var resultDate) ? resultDate : default;
+        title = match.Groups["Title"].Value;
+    }
+    //---|
+
+    //--- Get category ---
+    string? category;
+    {
+        category = indexMdFile.Directory?.Parent?.Name;
+    }
+    //---|
+
+    //--- Get relative html path ---
+    string? relativeHtmlPath;
+    { 
+        relativeHtmlPath = (indexMdFile.Directory?.Parent is { } grandParentDirectory && diaryYfm.Alias is { } diaryYfmAlias) ?
+            Path.Combine
+            (
+                Path.GetRelativePath(relativeTo: rootDirectory.FullName, path: grandParentDirectory.FullName),
+                $"{diaryYfmAlias}.html"
+            ) :
+            null;
+    }
+    //---|
 
     return new ContentCardConfigRawData()
     {
-        Title = yfm.Title,
-        Date = yfm.Date,
-        DailyIndex = yfm.DailyIndex,
-        Category = markdownFile.Directory?.Name,
+        Title = title,
+        Date = date,
+        Subindex = diaryYfm.Subindex,
+        Category = category,
         RelativeHtmlPath = relativeHtmlPath,
         ErrorMessage = null
     };
 }
+

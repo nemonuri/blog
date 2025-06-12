@@ -1,7 +1,5 @@
 ---
-title: 내가 원하는 블로그
-date: 2025-06-09
-daily_index: 0
+alias: what_blog_do_i_want
 ---
 
 # 내가 원하는 블로그는?

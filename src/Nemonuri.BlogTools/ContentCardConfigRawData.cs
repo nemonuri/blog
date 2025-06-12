@@ -9,7 +9,7 @@ public struct ContentCardConfigRawData
 
     public DateTime Date;
 
-    public int? DailyIndex;
+    public int? Subindex;
 
     public string? Category;
 
@@ -31,7 +31,7 @@ public class ContentCardConfigRawDataComparer(): IComparer<ContentCardConfigRawD
 
         static int GetDailyIndexOrMinusOne(ref ContentCardConfigRawData x)
         {
-            return x.DailyIndex ?? -1;
+            return x.Subindex ?? -1;
         }
     }
 }
