@@ -136,12 +136,8 @@ static ContentCardConfigRawData GetContentCardConfig
     //--- Get relative html path ---
     string? relativeHtmlPath;
     { 
-        relativeHtmlPath = (indexMdFile.Directory?.Parent is { } grandParentDirectory && diaryYfm.Alias is { } diaryYfmAlias) ?
-            Path.Combine
-            (
-                Path.GetRelativePath(relativeTo: rootDirectory.FullName, path: grandParentDirectory.FullName),
-                $"{diaryYfmAlias}.html"
-            ) :
+        relativeHtmlPath = (diaryYfm.Alias is { } diaryYfmAlias) ?
+            $"{diaryYfmAlias}.html" :
             null;
     }
     //---|
