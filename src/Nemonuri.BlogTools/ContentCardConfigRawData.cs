@@ -27,11 +27,11 @@ public class ContentCardConfigRawDataComparer(): IComparer<ContentCardConfigRawD
             return x.Date.CompareTo(y.Date);
         }
 
-        return GetDailyIndexOrMinusOne(ref x).CompareTo(GetDailyIndexOrMinusOne(ref y));
+        return GetDailyIndexOrZero(ref x).CompareTo(GetDailyIndexOrZero(ref y));
 
-        static int GetDailyIndexOrMinusOne(ref ContentCardConfigRawData x)
+        static int GetDailyIndexOrZero(ref ContentCardConfigRawData x)
         {
-            return x.Subindex ?? -1;
+            return x.Subindex ?? 0;
         }
     }
 }
