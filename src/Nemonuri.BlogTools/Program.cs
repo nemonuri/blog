@@ -17,16 +17,22 @@ IDeserializer yamlDeserializer;
 }
 ContentCardConfigRawDataComparer contentCardConfigRawDataComparer = new();
 DirectoryInfo blogContentDirectory = new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, Constants.BlogContent));
+LogTheory.Logger.PathResolved(blogContentDirectory);
 Dictionary<FileInfo, FileInfo> fileMap = new(new FileInfoEqualityComparer());
 //---|
 
 //--- Initialize _site directory ---
 DirectoryInfo siteDirectory;
-{ 
+{
     siteDirectory = GetSiteDirectory();
-    if (siteDirectory.Exists) { siteDirectory.Delete(recursive: true); }
+    if (siteDirectory.Exists)
+    {
+        siteDirectory.Delete(recursive: true);
+        LogTheory.Logger.DirectoryDeleted(nameof(siteDirectory), siteDirectory.FullName);
+    }
 
     siteDirectory.Create();
+    LogTheory.Logger.DirectoryCreated(nameof(siteDirectory), siteDirectory.FullName);
 }
 //---|
 
@@ -50,8 +56,13 @@ var contentCardConfigs = contentCardConfigAndMarkdownDocumentPairs
 //--- Create index.html file ---
 {
     FileInfo indexHtmlFile = new FileInfo(Path.Combine(siteDirectory.FullName, "index.html"));
-    indexHtmlFile.CreateParentDirectoryIfNeeded();
+    LogTheory.Logger.PathResolved(indexHtmlFile);
+
+    var v = indexHtmlFile.CreateParentDirectoryIfNeeded();
+    if (v is not null) { LogTheory.Logger.DirectoryCreated(v.FullName); }
+
     File.WriteAllText(indexHtmlFile.FullName, HtmlTheory.CreateIndexHtml(contentCardConfigs));
+    LogTheory.Logger.FileCreated(indexHtmlFile.FullName);
 }
 //---|
 
@@ -69,19 +80,23 @@ foreach (var pair in contentCardConfigAndMarkdownDocumentPairs)
 
     //--- Create blog post html document ---
     IDocument blogPostHtmlDocument = HtmlTheory.CreateBlogPostHtmlDocument(pair.MarkdownDocument, pipeline, pair.ContentCardConfigRawData.Title);
+
     FileInfo blogPostHtmlFile = new FileInfo(Path.Combine(siteDirectory.FullName, relativeHtmlPath));
+    LogTheory.Logger.PathResolved(blogPostHtmlFile);
+
     if (blogPostHtmlFile.Directory is not { } blogPostHtmlDirectory)
     {
         throw new InvalidOperationException($"{nameof(blogPostHtmlDirectory)} is null");
     }
     fileMap.TryAdd(pair.IndexMdFile, blogPostHtmlFile);
+    LogTheory.Logger.FileMapped(pair.IndexMdFile, blogPostHtmlFile);
     //---|
 
     //--- Create resource directory and resources ---
     {
         DirectoryInfo? destResourceDirectory = null;
 
-        foreach (FileInfo sourceResourceFile in indexMdDirectory.EnumerateFiles().Where(file => file.FullName != pair.IndexMdFile.FullName))
+        foreach (FileInfo sourceResourceFile in indexMdDirectory.EnumerateFiles("*", SearchOption.AllDirectories).Where(file => file.FullName != pair.IndexMdFile.FullName))
         {
             if (destResourceDirectory is null)
             {
@@ -93,16 +108,24 @@ foreach (var pair in contentCardConfigAndMarkdownDocumentPairs)
                         FileExtensionTheory.RemoveExtension(relativeHtmlPath)
                     )
                 );
+                LogTheory.Logger.PathResolved(destResourceDirectory);
+
                 destResourceDirectory.Create();
+                LogTheory.Logger.DirectoryCreated(destResourceDirectory);
             }
 
             string relativeSourceResourceFilePath = Path.GetRelativePath(indexMdDirectory.FullName, sourceResourceFile.FullName);
             FileInfo destResourceFile = new FileInfo(Path.Combine(destResourceDirectory.FullName, relativeSourceResourceFilePath));
+            LogTheory.Logger.PathResolved(destResourceFile.FullName);
 
-            destResourceFile.CreateParentDirectoryIfNeeded();
+            var v = destResourceFile.CreateParentDirectoryIfNeeded();
+            if (v is not null) { LogTheory.Logger.DirectoryCreated(v.FullName); }
+
             sourceResourceFile.CopyTo(destResourceFile.FullName);
+            LogTheory.Logger.FileCreated(destResourceFile.FullName);
 
             fileMap.TryAdd(sourceResourceFile, destResourceFile);
+            LogTheory.Logger.FileMapped(sourceResourceFile, destResourceFile);
         }
     }
     //---|
@@ -135,8 +158,11 @@ foreach (var pair in contentCardConfigAndMarkdownDocumentPairs)
     //--- Create blog post file ---
     {
         string html = HtmlTheory.ToPrettyFormattedHtml(blogPostHtmlDocument);
-        blogPostHtmlFile.CreateParentDirectoryIfNeeded();
+        var v = blogPostHtmlFile.CreateParentDirectoryIfNeeded();
+        if (v is not null) { LogTheory.Logger.DirectoryCreated(v.FullName); }
+
         File.WriteAllText(blogPostHtmlFile.FullName, html);
+        LogTheory.Logger.FileCreated(blogPostHtmlFile.FullName);
     }
     //---|
 }
