@@ -152,4 +152,3 @@ static ContentCardConfigRawData GetContentCardConfig
         ErrorMessage = null
     };
 }
-
