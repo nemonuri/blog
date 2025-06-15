@@ -75,7 +75,7 @@ public static class HtmlTheory
         return result;
     }
 
-    public static string CreateBlogPostHtml
+    public static IDocument CreateBlogPostHtmlDocument
     (
         MarkdownDocument markdownDocument,
         MarkdownPipeline? pipeline,
@@ -94,9 +94,10 @@ public static class HtmlTheory
             body.InnerHtml = mdToHtml;
         }
 
-        string result = document.ToPrettyFormattedHtml();
+        //string result = document.ToPrettyFormattedHtml();
+        //return result;
 
-        return result;
+        return document;
     }
 
     private static IDocument? _basicHtmlDocument;

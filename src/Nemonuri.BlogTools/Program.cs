@@ -29,7 +29,15 @@ DirectoryInfo siteDirectory;
 
 //--- Create and sort ContentCardConfigRawData collection ---
 var contentCardConfigAndMarkdownDocumentPairs = EnumerateMarkdownDocuments(blogContentDirectory, pipeline)
-    .Select(p => (ContentCardConfigRawData: GetContentCardConfig(blogContentDirectory, p.IndexMdFile, p.MarkdownDocument, yamlDeserializer), MarkdownDocument: p.MarkdownDocument));
+    .Select
+    (
+        p =>
+        (
+            ContentCardConfigRawData: GetContentCardConfig(blogContentDirectory, p.IndexMdFile, p.MarkdownDocument, yamlDeserializer),
+            IndexMdFile: p.IndexMdFile,
+            MarkdownDocument: p.MarkdownDocument
+        )
+    );
 
 var contentCardConfigs = contentCardConfigAndMarkdownDocumentPairs
     .Select(p => p.ContentCardConfigRawData)
@@ -39,12 +47,12 @@ var contentCardConfigs = contentCardConfigAndMarkdownDocumentPairs
 //--- Create index.html file ---
 { 
     FileInfo indexHtmlFile = new FileInfo(Path.Combine(siteDirectory.FullName, "index.html"));
-    indexHtmlFile.GetParentDirectoryIfNotExists()?.Create();
+    indexHtmlFile.CreateParentDirectoryIfNeeded();
     File.WriteAllText(indexHtmlFile.FullName, HtmlTheory.CreateIndexHtml(contentCardConfigs));
 }
 //---|
 
-//--- Create blog post files ---
+//--- Create blog post files and resource directories ---
 foreach (var pair in contentCardConfigAndMarkdownDocumentPairs)
 {
     if (pair.ContentCardConfigRawData.RelativeHtmlPath is not { } relativeHtmlPath)
@@ -52,10 +60,40 @@ foreach (var pair in contentCardConfigAndMarkdownDocumentPairs)
         throw new InvalidOperationException($"{nameof(relativeHtmlPath)} is null");
     }
 
-    string html = HtmlTheory.CreateBlogPostHtml(pair.MarkdownDocument, pipeline, pair.ContentCardConfigRawData.Title);
-    FileInfo blogPostHtmlFile = new FileInfo(Path.Combine(siteDirectory.FullName, relativeHtmlPath));
-    blogPostHtmlFile.GetParentDirectoryIfNotExists()?.Create();
-    File.WriteAllText(blogPostHtmlFile.FullName, html);
+    //--- Create blog post html document ---
+    AngleSharp.Dom.IDocument blogPostHtmlDocument = HtmlTheory.CreateBlogPostHtmlDocument(pair.MarkdownDocument, pipeline, pair.ContentCardConfigRawData.Title);
+    //---|
+
+    //--- Create resource directory and resources ---
+    if (pair.IndexMdFile.Directory is { } indexMdDirectory)
+    {
+        DirectoryInfo? destResourceDirectory = null;
+
+        foreach (FileInfo sourceResourceFile in indexMdDirectory.EnumerateFiles().Where(file => file.FullName != pair.IndexMdFile.FullName))
+        {
+            if (destResourceDirectory is null)
+            {
+                destResourceDirectory = new DirectoryInfo(Path.Combine(siteDirectory.FullName, FileExtensionTheory.RemoveExtension(relativeHtmlPath)));
+                destResourceDirectory.Create();
+            }
+
+            string relativeSourceResourceFilePath = Path.GetRelativePath(indexMdDirectory.FullName, sourceResourceFile.FullName);
+            FileInfo destResourceFile = new FileInfo(Path.Combine(destResourceDirectory.FullName, relativeSourceResourceFilePath));
+
+            destResourceFile.CreateParentDirectoryIfNeeded();
+            sourceResourceFile.CopyTo(destResourceFile.FullName);
+        }
+    }
+    //---|
+
+    //--- Create blog post file ---
+    { 
+        string html = HtmlTheory.CreateBlogPostHtml(pair.MarkdownDocument, pipeline, pair.ContentCardConfigRawData.Title);
+        FileInfo blogPostHtmlFile = new FileInfo(Path.Combine(siteDirectory.FullName, relativeHtmlPath));
+        blogPostHtmlFile.CreateParentDirectoryIfNeeded();
+        File.WriteAllText(blogPostHtmlFile.FullName, html);
+    }
+    //---|
 }
 //---|
 

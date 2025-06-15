@@ -13,7 +13,7 @@
   <!-- /NugetProps -->
   
   <ItemGroup>
-    <None Include="$(BlogContentDirectory)**/*.md">
+    <None Include="$(BlogContentDirectory)**/*.md;$(BlogContentDirectory)**/*.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>blog-content/%(RecursiveDir)%(Filename)%(Extension)</Link>
     </None>

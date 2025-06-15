@@ -13,4 +13,11 @@ public static class FileSystemInfoTheory
             return null;
         }
     }
+
+    public static DirectoryInfo? CreateParentDirectoryIfNeeded(this FileInfo fileInfo)
+    {
+        var parentDirectory = fileInfo.GetParentDirectoryIfNotExists();
+        parentDirectory?.Create();
+        return parentDirectory;
+    }
 }
