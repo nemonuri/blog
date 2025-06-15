@@ -129,7 +129,7 @@ static ContentCardConfigRawData GetContentCardConfig
     //--- Get category ---
     string? category;
     {
-        category = indexMdFile.Directory?.Parent?.Name;
+        category = CategoryNameTheory.TranslateCategoryName(indexMdFile.Directory?.Parent?.Name);
     }
     //---|
 
