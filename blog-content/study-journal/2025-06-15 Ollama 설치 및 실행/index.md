@@ -1,3 +1,7 @@
+---
+alias: install-ollama-and-run
+---
+
 # Ollama 설치 및 실행
 
 ## 학습 목표
