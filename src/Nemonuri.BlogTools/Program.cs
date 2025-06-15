@@ -5,6 +5,8 @@ using Markdig.Syntax;
 using Nemonuri.BlogTools;
 using YamlDotNet.Serialization;
 using System.Text.RegularExpressions;
+using AngleSharp.Dom;
+using AngleSharp.Html.Dom;
 
 //--- Arrage ---
 MarkdownPipeline pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().UseYamlFrontMatter().Build();
@@ -15,6 +17,7 @@ IDeserializer yamlDeserializer;
 }
 ContentCardConfigRawDataComparer contentCardConfigRawDataComparer = new();
 DirectoryInfo blogContentDirectory = new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, Constants.BlogContent));
+Dictionary<FileInfo, FileInfo> fileMap = new(new FileInfoEqualityComparer());
 //---|
 
 //--- Initialize _site directory ---
@@ -45,7 +48,7 @@ var contentCardConfigs = contentCardConfigAndMarkdownDocumentPairs
 //---|
 
 //--- Create index.html file ---
-{ 
+{
     FileInfo indexHtmlFile = new FileInfo(Path.Combine(siteDirectory.FullName, "index.html"));
     indexHtmlFile.CreateParentDirectoryIfNeeded();
     File.WriteAllText(indexHtmlFile.FullName, HtmlTheory.CreateIndexHtml(contentCardConfigs));
@@ -59,13 +62,22 @@ foreach (var pair in contentCardConfigAndMarkdownDocumentPairs)
     {
         throw new InvalidOperationException($"{nameof(relativeHtmlPath)} is null");
     }
+    if (pair.IndexMdFile.Directory is not { } indexMdDirectory)
+    {
+        throw new InvalidOperationException($"{nameof(indexMdDirectory)} is null");
+    }
 
     //--- Create blog post html document ---
-    AngleSharp.Dom.IDocument blogPostHtmlDocument = HtmlTheory.CreateBlogPostHtmlDocument(pair.MarkdownDocument, pipeline, pair.ContentCardConfigRawData.Title);
+    IDocument blogPostHtmlDocument = HtmlTheory.CreateBlogPostHtmlDocument(pair.MarkdownDocument, pipeline, pair.ContentCardConfigRawData.Title);
+    FileInfo blogPostHtmlFile = new FileInfo(Path.Combine(siteDirectory.FullName, relativeHtmlPath));
+    if (blogPostHtmlFile.Directory is not { } blogPostHtmlDirectory)
+    {
+        throw new InvalidOperationException($"{nameof(blogPostHtmlDirectory)} is null");
+    }
+    fileMap.TryAdd(pair.IndexMdFile, blogPostHtmlFile);
     //---|
 
     //--- Create resource directory and resources ---
-    if (pair.IndexMdFile.Directory is { } indexMdDirectory)
     {
         DirectoryInfo? destResourceDirectory = null;
 
@@ -73,7 +85,14 @@ foreach (var pair in contentCardConfigAndMarkdownDocumentPairs)
         {
             if (destResourceDirectory is null)
             {
-                destResourceDirectory = new DirectoryInfo(Path.Combine(siteDirectory.FullName, FileExtensionTheory.RemoveExtension(relativeHtmlPath)));
+                destResourceDirectory = new DirectoryInfo
+                (
+                    Path.Combine
+                    (
+                        siteDirectory.FullName,
+                        FileExtensionTheory.RemoveExtension(relativeHtmlPath)
+                    )
+                );
                 destResourceDirectory.Create();
             }
 
@@ -82,14 +101,40 @@ foreach (var pair in contentCardConfigAndMarkdownDocumentPairs)
 
             destResourceFile.CreateParentDirectoryIfNeeded();
             sourceResourceFile.CopyTo(destResourceFile.FullName);
+
+            fileMap.TryAdd(sourceResourceFile, destResourceFile);
+        }
+    }
+    //---|
+
+    //--- Rewrite img src ---
+    {
+        var imgs = blogPostHtmlDocument.DocumentElement.GetElementsByTagName(TagNames.Img).OfType<IHtmlImageElement>();
+        foreach (IHtmlImageElement img in imgs)
+        {
+            string? url = img.GetAttribute(AttributeNames.Src);
+            if
+            (
+                url is null ||
+                url.Contains(':')
+            )
+            {
+                continue;
+            }
+
+            FileInfo sourceFile = new FileInfo(Path.Combine(indexMdDirectory.FullName, url));
+            if (!fileMap.TryGetValue(sourceFile, out var destFile)) { continue; }
+
+            string relativeUrl = Path.GetRelativePath(blogPostHtmlDirectory.FullName, destFile.FullName);
+            relativeUrl = DirectorySeperatorTheory.ReplacePathSeperatorsWithUriStyle(relativeUrl);
+            img.SetAttribute(AttributeNames.Src, relativeUrl);
         }
     }
     //---|
 
     //--- Create blog post file ---
-    { 
-        string html = HtmlTheory.CreateBlogPostHtml(pair.MarkdownDocument, pipeline, pair.ContentCardConfigRawData.Title);
-        FileInfo blogPostHtmlFile = new FileInfo(Path.Combine(siteDirectory.FullName, relativeHtmlPath));
+    {
+        string html = HtmlTheory.ToPrettyFormattedHtml(blogPostHtmlDocument);
         blogPostHtmlFile.CreateParentDirectoryIfNeeded();
         File.WriteAllText(blogPostHtmlFile.FullName, html);
     }
