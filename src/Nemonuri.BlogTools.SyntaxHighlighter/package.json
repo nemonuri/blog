@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "highlight.js": "^11.11.1"
+  }
+}

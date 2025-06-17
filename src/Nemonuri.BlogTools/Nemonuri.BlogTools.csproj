@@ -32,5 +32,13 @@
   <ItemGroup>
     <AssemblyMetadata Include="SiteDirectory" Value="$(SiteDirectory)" />
   </ItemGroup>
+  
+  <Target
+    Name="BuildJavascriptModules"
+    BeforeTargets="BeforeBuild"
+    Condition="'$(DesignTimeBuild)' != 'true'">
+    <Exec
+      Command="npm --prefix=%22$([System.IO.Path]::GetDirectoryName('%(TypeScriptProject.FullPath)'))%22 exec -- tsc -p %22%(TypeScriptProject.FullPath)%22" />
+  </Target>
 
 </Project>

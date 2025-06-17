@@ -14,4 +14,8 @@
     <UseArtifactsOutput>true</UseArtifactsOutput>
     <ArtifactsPath>$(MSBuildThisFileDirectory)artifact/dotnet</ArtifactsPath>
   </PropertyGroup>
+
+  <ItemGroup>
+    <TypeScriptProject Include="$(MSBuildThisFileDirectory)src/**/tsconfig.json"/>
+  </ItemGroup>
 </Project>
