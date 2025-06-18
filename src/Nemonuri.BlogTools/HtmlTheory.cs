@@ -88,21 +88,6 @@ public static class HtmlTheory
 
         document.Title = string.Concat("네모누리의 블로그", " - ", subTitle ?? "No Title");
 
-        //--- 코드 블록 렌더링 수정 ---
-        foreach (var codeBlock in markdownDocument.OfType<FencedCodeBlock>())
-        {
-            if (codeBlock.Info is not { } info) { continue; }
-
-            var syntaxed = JavascriptTheory.HighlightSyntax(codeBlock.Lines.ToString(), info, out bool languageExists);
-            if (!languageExists) { continue; }
-
-            codeBlock.Lines.Clear();
-            foreach (string stringLine in syntaxed.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
-            {
-                codeBlock.Lines.Add(new StringSlice(stringLine, NewLine.LineFeed));
-            }
-        }
-        //---|
         string mdToHtml = markdownDocument.ToHtml(pipeline);
         LogTheory.Logger.MarkdownConvertedToHtml(mdToHtml);
 
@@ -111,8 +96,31 @@ public static class HtmlTheory
             body.InnerHtml = mdToHtml;
         }
 
-        //string result = document.ToPrettyFormattedHtml();
-        //return result;
+        //--- 코드 블록 렌더링 수정 ---
+        foreach (var codeElement in document.Body?.Descendants<IHtmlElement>()?.Where(e => string.Equals(e.TagName, TagNames.Code, StringComparison.InvariantCultureIgnoreCase)) ?? [])
+        {
+            if
+            (
+                codeElement.ClassList
+                    .Select(className => RegexTheory.GetLanguageNameRegex().Match(className))
+                    .FirstOrDefault(m => m.Success) is not { } match
+            )
+            {
+                continue;
+            }
+
+            string languageName = match.Groups["LanguageName"].Value;
+            if (string.IsNullOrEmpty(languageName))
+            {
+                continue;
+            }
+
+            var syntaxed = JavascriptTheory.HighlightSyntax(codeElement.InnerHtml, languageName, out bool languageExists);
+            if (!languageExists) { continue; }
+
+            codeElement.InnerHtml = syntaxed;
+        }
+        //---|
 
         return document;
     }
