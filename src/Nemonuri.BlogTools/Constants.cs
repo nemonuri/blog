@@ -9,4 +9,6 @@ public static class Constants
     public const string StudyJournal = "study-journal";
 
     public const string Idea = "idea";
+
+    public const string JavascriptModule = "javascript-module";
 }

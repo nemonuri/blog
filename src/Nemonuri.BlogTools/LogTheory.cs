@@ -11,7 +11,11 @@ public static partial class LogTheory
 
     [LoggerMessage(
         LogLevel.Information,
-        Message = "Path resolved. Name: {Name}, Path: {Path}")]
+        Message = """
+        Path resolved. 
+        - Name: {Name}, 
+        - Path: {Path}
+        """)]
     public static partial void PathResolved(this ILogger logger, string name, string path);
 
     public static void PathResolved
@@ -24,17 +28,28 @@ public static partial class LogTheory
 
     [LoggerMessage(
         LogLevel.Information,
-        Message = "Path resolved. Path: {Path}")]
+        Message = """
+        Path resolved. 
+        - Path: {Path}
+        """)]
     public static partial void PathResolved(this ILogger logger, string path);
 
     [LoggerMessage(
         LogLevel.Information,
-        Message = "Directory deleted. Name: {Name}, Path: {Path}")]
+        Message = """
+        Directory deleted. 
+        - Name: {Name}, 
+        - Path: {Path}
+        """)]
     public static partial void DirectoryDeleted(this ILogger logger, string name, string path);
 
     [LoggerMessage(
         LogLevel.Information,
-        Message = "Directory created. Name: {Name}, Path: {Path}")]
+        Message = """
+        Directory created. 
+        - Name: {Name}, 
+        - Path: {Path}
+        """)]
     public static partial void DirectoryCreated(this ILogger logger, string name, string path);
 
     public static void DirectoryCreated
@@ -47,17 +62,27 @@ public static partial class LogTheory
 
     [LoggerMessage(
         LogLevel.Information,
-        Message = "Directory created. Path: {Path}")]
+        Message = """
+        Directory created. 
+        - Path: {Path}
+        """)]
     public static partial void DirectoryCreated(this ILogger logger, string path);
 
     [LoggerMessage(
         LogLevel.Information,
-        Message = "File created. Path: {Path}")]
+        Message = """
+        File created. 
+        - Path: {Path}
+        """)]
     public static partial void FileCreated(this ILogger logger, string path);
 
     [LoggerMessage(
         LogLevel.Information,
-        Message = "File mapped. SourceFilePath: {SourceFilePath}, DestFilePath: {DestFilePath}")]
+        Message = """
+        File mapped. 
+        SourceFilePath: {SourceFilePath}, 
+        DestFilePath: {DestFilePath}
+        """)]
     public static partial void FileMapped(this ILogger logger, string sourceFilePath, string destFilePath);
 
     public static void FileMapped(this ILogger logger, FileInfo sourceFile, FileInfo destFile) =>

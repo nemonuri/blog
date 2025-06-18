@@ -5,6 +5,7 @@
 
     <NugetPropsDirectory>$(MSBuildThisFileDirectory)res/nuget-props/</NugetPropsDirectory>
     <HtmlTemplateDirectory>$(MSBuildThisFileDirectory)res/html-template/</HtmlTemplateDirectory>
+    <JavascriptModuleDirectory>$(MSBuildThisFileDirectory)res/javascript-module/</JavascriptModuleDirectory>
     <BlogContentDirectory>$(MSBuildThisFileDirectory)blog-content/</BlogContentDirectory>
     <SiteDirectory>$(MSBuildThisFileDirectory)artifact/_site/</SiteDirectory>
 
