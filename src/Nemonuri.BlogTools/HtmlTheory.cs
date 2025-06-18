@@ -3,6 +3,7 @@ using AngleSharp.Dom;
 using AngleSharp.Html;
 using AngleSharp.Html.Dom;
 using Markdig;
+using Markdig.Helpers;
 using Markdig.Syntax;
 
 namespace Nemonuri.BlogTools;
@@ -87,6 +88,20 @@ public static class HtmlTheory
 
         document.Title = string.Concat("네모누리의 블로그", " - ", subTitle ?? "No Title");
 
+        //--- 코드 블록 렌더링 수정 ---
+        foreach (var codeBlock in markdownDocument.OfType<FencedCodeBlock>())
+        {
+            if (codeBlock.Info is not { } info) { continue; }
+
+            var syntaxed = JavascriptTheory.HighlightSyntax(codeBlock.Lines.ToString(), info);
+
+            codeBlock.Lines.Clear();
+            foreach (string stringLine in syntaxed.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
+            {
+                codeBlock.Lines.Add(new StringSlice(stringLine, NewLine.LineFeed));
+            }
+        }
+        //---|
         string mdToHtml = markdownDocument.ToHtml(pipeline);
         LogTheory.Logger.MarkdownConvertedToHtml(mdToHtml);
 

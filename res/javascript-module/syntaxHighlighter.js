@@ -46283,7 +46283,8 @@ Category: common
 
 function python(hljs) {
   const regex = hljs.regex;
-  const IDENT_RE = /[\p{XID_Start}_]\p{XID_Continue}*/u;
+  //const IDENT_RE = /[\p{XID_Start}_]\p{XID_Continue}*/u;
+  const IDENT_RE = /[\p{L}\p{Nl}_][\p{L}\p{Nl}_\p{Nd}\p{Pc}\p{Mn}\p{Mc}\p{Cf}]*/u;
   const RESERVED_WORDS = [
     'and',
     'as',

@@ -16,6 +16,7 @@
     <Import Project="$(NugetPropsDirectory)Markdig.props" />
     <Import Project="$(NugetPropsDirectory)YamlDotNet.props" />
     <Import Project="$(NugetPropsDirectory)Microsoft.Extensions.Logging.Console.props" />
+    <Import Project="$(NugetPropsDirectory)Jint.props" />
   <!-- /NugetProps -->
   
   <ItemGroup>
