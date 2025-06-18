@@ -88,6 +88,16 @@ public static class HtmlTheory
 
         document.Title = string.Concat("네모누리의 블로그", " - ", subTitle ?? "No Title");
 
+        //--- cdn 스타일시트 추가 ---
+        {
+            var link = (IHtmlLinkElement)document.CreateElement(TagNames.Link);
+            link.Relation = "stylesheet";
+            link.Href = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css";
+            document.Head?.AppendChild(link);
+        }
+
+        //---|
+
         string mdToHtml = markdownDocument.ToHtml(pipeline);
         LogTheory.Logger.MarkdownConvertedToHtml(mdToHtml);
 
