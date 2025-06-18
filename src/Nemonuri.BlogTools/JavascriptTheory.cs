@@ -17,7 +17,7 @@ public static class JavascriptTheory
     public static string HighlightSyntax(string code, string language)
     {
         var jsValue = SyntaxHighlighterEngine.Evaluate($"""
-        SyntaxHighlighter.highlightSyntax({code}, {language})
+        SyntaxHighlighter.highlightSyntax("{code}", "{language}")
         """);
 
         return jsValue.AsString();
