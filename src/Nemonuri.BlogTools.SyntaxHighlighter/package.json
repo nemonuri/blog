@@ -1,8 +1,15 @@
 {
   "devDependencies": {
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "webpack": "^5.99.9",
+    "webpack-cli": "^6.0.1"
   },
   "dependencies": {
     "highlight.js": "^11.11.1"
+  },
+  "scripts": {
+    "build": "npm run build-ts && npm run bundle",
+    "build-ts": "npx tsc",
+    "bundle" : "npx webpack build ./index.js --mode=none --target=es6 --output-chunk-format=module --output-library=SyntaxHighlighter"
   }
 }

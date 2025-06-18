@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk" TreatAsLocalProperty="NpmProjectDirectory;NpmFrontCommand">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup>
-  
+
   <!-- NugetProps -->
     <Import Project="$(NugetPropsDirectory)Markdig.props" />
     <Import Project="$(NugetPropsDirectory)YamlDotNet.props" />
@@ -32,13 +32,24 @@
   <ItemGroup>
     <AssemblyMetadata Include="SiteDirectory" Value="$(SiteDirectory)" />
   </ItemGroup>
-  
+
   <Target
     Name="BuildJavascriptModules"
+    Inputs="@(TypeScriptProject)"
+    Outputs="%(FullPath)"
     BeforeTargets="BeforeBuild"
-    Condition="'$(DesignTimeBuild)' != 'true'">
+    Condition="('$(DesignTimeBuild)' != 'true') and false">
+    
+    <PropertyGroup>
+      <NpmProjectDirectory>$([System.IO.Path]::GetDirectoryName('%(TypeScriptProject.FullPath)'))</NpmProjectDirectory>
+      <NpmFrontCommand>npm --prefix="$(NpmProjectDirectory)" exec --</NpmFrontCommand>
+    </PropertyGroup>
+    
+    <Exec Command="npm clean-install --workspace=%22$(NpmProjectDirectory)%22 " />
+    <Exec Command="$(NpmFrontCommand) -- tsc -p %22%(TypeScriptProject.FullPath)%22" />
     <Exec
-      Command="npm --prefix=%22$([System.IO.Path]::GetDirectoryName('%(TypeScriptProject.FullPath)'))%22 exec -- tsc -p %22%(TypeScriptProject.FullPath)%22" />
+      Command="$(NpmFrontCommand) -- webpack build $(NpmProjectDirectory)/index.js --mode=none --output-path=%22$(JavaScriptArtifactDirectory)%22" />
+
   </Target>
 
 </Project>

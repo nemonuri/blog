@@ -13,9 +13,10 @@
   <PropertyGroup>
     <UseArtifactsOutput>true</UseArtifactsOutput>
     <ArtifactsPath>$(MSBuildThisFileDirectory)artifact/dotnet</ArtifactsPath>
+    <JavaScriptArtifactDirectory>$(MSBuildThisFileDirectory)artifact/javascript-module/</JavaScriptArtifactDirectory>
   </PropertyGroup>
 
   <ItemGroup>
-    <TypeScriptProject Include="$(MSBuildThisFileDirectory)src/**/tsconfig.json"/>
+    <TypeScriptProject Include="$(MSBuildThisFileDirectory)src/**/tsconfig.json" Exclude="**/node_modules/**/*.*" />
   </ItemGroup>
 </Project>
