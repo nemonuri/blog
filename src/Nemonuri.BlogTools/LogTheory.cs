@@ -5,7 +5,21 @@ namespace Nemonuri.BlogTools;
 
 public static partial class LogTheory
 {
-    private static readonly ILogger<Program> _logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<Program>();
+    private static readonly ILogger<Program> _logger = LoggerFactory.Create(ConfigLoggingBuilder).CreateLogger<Program>();
+
+    private static void ConfigLoggingBuilder(ILoggingBuilder builder)
+    {
+        builder.AddConsole();
+
+        builder.SetMinimumLevel
+        (
+#if DEBUG_LOG
+            LogLevel.Debug
+#else
+            LogLevel.Information
+#endif
+        );
+    }
 
     public static ILogger Logger => _logger;
 
@@ -87,5 +101,14 @@ public static partial class LogTheory
 
     public static void FileMapped(this ILogger logger, FileInfo sourceFile, FileInfo destFile) =>
         logger.FileMapped(sourceFile.FullName, destFile.FullName);
+
+    [LoggerMessage(
+        LogLevel.Debug,
+        Message = """
+        Markdown converted to HTML. 
+        HTML:
+        {Html}
+        """)]
+    public static partial void MarkdownConvertedToHtml(this ILogger logger, string html);
 
 }

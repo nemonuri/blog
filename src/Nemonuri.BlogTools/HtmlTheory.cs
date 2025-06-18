@@ -88,6 +88,7 @@ public static class HtmlTheory
         document.Title = string.Concat("네모누리의 블로그", " - ", subTitle ?? "No Title");
 
         string mdToHtml = markdownDocument.ToHtml(pipeline);
+        LogTheory.Logger.MarkdownConvertedToHtml(mdToHtml);
 
         if (document.Body is { } body)
         {

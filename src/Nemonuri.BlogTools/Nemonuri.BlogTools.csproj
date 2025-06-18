@@ -7,6 +7,10 @@
     <Nullable>enable</Nullable>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup>
+  
+  <PropertyGroup Condition=" '$(DebugLog)' == 'true' ">
+    <DefineConstants>$(DefineConstants);DEBUG_LOG</DefineConstants>
+  </PropertyGroup>
 
   <!-- NugetProps -->
     <Import Project="$(NugetPropsDirectory)Markdig.props" />
