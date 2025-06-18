@@ -111,4 +111,22 @@ public static partial class LogTheory
         """)]
     public static partial void MarkdownConvertedToHtml(this ILogger logger, string html);
 
+    [LoggerMessage(
+        LogLevel.Debug,
+        Message = """
+        Evaluating javscript code. 
+        Module: {Module}
+        Code:
+        {Code}
+        """)]
+    public static partial void JavscriptCodeEvaluating(this ILogger logger, string module, string code);
+
+    [LoggerMessage(
+        LogLevel.Debug,
+        Message = """
+        Javscript code evaluated. 
+        Result: {Result}
+        """)]
+    public static partial void JavscriptCodeEvaluated(this ILogger logger, string result);
+
 }
