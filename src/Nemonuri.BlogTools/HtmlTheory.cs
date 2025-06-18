@@ -93,7 +93,8 @@ public static class HtmlTheory
         {
             if (codeBlock.Info is not { } info) { continue; }
 
-            var syntaxed = JavascriptTheory.HighlightSyntax(codeBlock.Lines.ToString(), info);
+            var syntaxed = JavascriptTheory.HighlightSyntax(codeBlock.Lines.ToString(), info, out bool languageExists);
+            if (!languageExists) { continue; }
 
             codeBlock.Lines.Clear();
             foreach (string stringLine in syntaxed.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))

@@ -4,9 +4,9 @@ using Markdig.Extensions.Yaml;
 using Markdig.Syntax;
 using Nemonuri.BlogTools;
 using YamlDotNet.Serialization;
-using System.Text.RegularExpressions;
 using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
+using AngleSharp;
 
 //--- Arrage ---
 MarkdownPipeline pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().UseYamlFrontMatter().Build();
@@ -157,7 +157,7 @@ foreach (var pair in contentCardConfigAndMarkdownDocumentPairs)
 
     //--- Create blog post file ---
     {
-        string html = HtmlTheory.ToPrettyFormattedHtml(blogPostHtmlDocument);
+        string html = blogPostHtmlDocument.ToHtml(); //HtmlTheory.ToPrettyFormattedHtml(blogPostHtmlDocument);
         var v = blogPostHtmlFile.CreateParentDirectoryIfNeeded();
         if (v is not null) { LogTheory.Logger.DirectoryCreated(v.FullName); }
 

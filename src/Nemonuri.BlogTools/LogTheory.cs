@@ -99,6 +99,15 @@ public static partial class LogTheory
         """)]
     public static partial void FileMapped(this ILogger logger, string sourceFilePath, string destFilePath);
 
+    [LoggerMessage(
+        LogLevel.Information,
+        Message = """
+        Language exists in highlight.js tested. 
+        - LanguageName: {LanguageName}
+        - Exists: {Exists}
+        """)]
+    public static partial void LanguageExistsInHighlightJsTested(this ILogger logger, string languageName, bool exists);
+
     public static void FileMapped(this ILogger logger, FileInfo sourceFile, FileInfo destFile) =>
         logger.FileMapped(sourceFile.FullName, destFile.FullName);
 

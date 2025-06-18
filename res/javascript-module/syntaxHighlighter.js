@@ -11,6 +11,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.highlightSyntax = highlightSyntax;
+exports.isLanguageExist = isLanguageExist;
 const highlight_js_1 = __importDefault(__webpack_require__(1));
 function highlightSyntax(code, language) {
     let highlightOptions = {
@@ -19,6 +20,9 @@ function highlightSyntax(code, language) {
     };
     let result = highlight_js_1.default.highlight(code, highlightOptions);
     return result.value;
+}
+function isLanguageExist(language) {
+    return highlight_js_1.default.getLanguage(language) !== undefined;
 }
 
 

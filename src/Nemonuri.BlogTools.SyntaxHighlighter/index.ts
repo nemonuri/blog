@@ -9,3 +9,8 @@ export function highlightSyntax(code: string, language: string): string
     let result: HighlightResult = hljs.highlight(code, highlightOptions);
     return result.value;
 }
+
+export function isLanguageExist(language: string): boolean
+{
+    return hljs.getLanguage(language) !== undefined;
+}

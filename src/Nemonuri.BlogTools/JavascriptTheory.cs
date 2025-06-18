@@ -26,8 +26,16 @@ public static class JavascriptTheory
             )
         );
 
-    public static string HighlightSyntax(string code, string language)
+    public static string HighlightSyntax(string code, string language, out bool languageExists)
     {
+        languageExists = IsLanguageExist(language);
+        LogTheory.Logger.LanguageExistsInHighlightJsTested(language, languageExists);
+
+        if (!languageExists)
+        {
+            return code;
+        }
+
         string escapedCode = $"""
         SyntaxHighlighter.highlightSyntax("{EscapeString(code)}", "{language}")
         """;
@@ -40,6 +48,15 @@ public static class JavascriptTheory
         LogTheory.Logger.JavscriptCodeEvaluated(result);
 
         return result;
+    }
+
+    public static bool IsLanguageExist(string language)
+    {
+        var jsValue = SyntaxHighlighterEngine.Evaluate($"""
+        SyntaxHighlighter.isLanguageExist("{language}")
+        """);
+
+        return jsValue.AsBoolean();
     }
 
     private static readonly char[] _escapeTargetChars = ['\t', '\b', '\n', '\r', '\f', '\0', '\v', '\'', '\"', '\\'];
