@@ -118,6 +118,60 @@ I'm a basic program that prints the famous "Hello, world!" message to the consol
 ./ollama.exe list
 ```
 
+## Ollama 채팅 실행 예시
+
+1. `qwen3:0.6b` 모델 실행
+```pwsh
+PS > ollama run qwen3:0.6b
+```
+
+```
+>>> 안녕? 한국말 할 줄 알아?
+Thinking...
+Okay, the user is asking in Korean, so I need to respond in Korean. Let me check the message again. They said "안녕? 한국말 할 줌?" which
+translates to "Hello? Do you know Korean?" So the user wants to confirm if they can speak Korean.
+
+I should respond in Korean, so I need to make sure I'm using the correct terms. "안녕" is "Hello," and "한국말" is "Korean." So the response
+should be "안녕하세요. Korean 말을 잘 알고 있어요!" which means "Hello! I know Korean well."
+
+I should also make sure the tone is friendly and helpful. The user might be trying to check if I can speak Korean, so providing a clear and
+positive response is important. Let me double-check the translation to ensure accuracy. Yes, that looks right. Now, put it all together in
+Korean.
+...done thinking.
+
+안녕하세요. Korean 말을 잘 알고 있어요! 😊
+
+>>> """다음 내용을 문구 하나로 표현하라.
+... ```
+... 1. '필드의 크기(fieldSize)'를 입력으로 받는다.
+... 2. 필드에 몬스터들을 생성합니다.
+... 3. '생성된 몬스터 개체 리스트'를 반환한다.
+... ```
+... """
+Thinking...
+Okay, let's see. The user wants me to express three tasks into a single sentence using Korean. The tasks are:
+
+1. "필드의 크기(fieldSize)"를 입력으로 받는다.
+2. 필드에 몬스터들을 생성합니다.
+3. "생성된 몬스터 개체 리스트"를 반환한다.
+
+First, I need to make sure each task is included in a single sentence. Let me think about how to combine them. Maybe start with the first
+task, then mention the second, and end with the third.
+
+So, "필드의 크기(fieldSize)를 입력으로 받고, 필드에 몬스터들을 생성하고, 생성된 몬스터 개체 리스트를 반환합니다." That seems good. Let me
+check if there's a better way. Maybe "필드에 몬스터를 생성하고, 생성된 몬스터 개체 리스트를 반환할 수 있습니다." But the original tasks are
+in Korean, so keeping them exact is better. Also, ensuring the order makes sense in a single sentence. Yeah, that should work.
+...done thinking.
+
+필드의 크기(fieldSize)를 입력으로 받고, 필드에 몬스터를 생성하고, 생성된 몬스터 개체 리스트를 반환합니다.
+```
+
+### 개인적인 소감
+
+- 엄청 빠르고 가볍다! 용량도 작고. 계산 부담도 적고.
+- 게다가 'Thinking...' 기능도 꽤 마음에 든다!
+- 물론 무거운 모델도 있다...모델마다 장단점이 있으니 잘 선택할 것.
+
 ## 참고자료
 
 - [ollama 공식 Github repository](https://github.com/ollama/ollama)

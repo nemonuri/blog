@@ -1,9 +1,9 @@
+using System.Text.RegularExpressions;
 using AngleSharp;
 using AngleSharp.Dom;
 using AngleSharp.Html;
 using AngleSharp.Html.Dom;
 using Markdig;
-using Markdig.Helpers;
 using Markdig.Syntax;
 
 namespace Nemonuri.BlogTools;
@@ -125,7 +125,7 @@ public static class HtmlTheory
                 continue;
             }
 
-            var syntaxed = JavascriptTheory.HighlightSyntax(codeElement.InnerHtml, languageName, out bool languageExists);
+            var syntaxed = JavascriptTheory.HighlightSyntax(Unescape(codeElement.InnerHtml), languageName, out bool languageExists);
             if (!languageExists) { continue; }
 
             codeElement.InnerHtml = syntaxed;
@@ -179,5 +179,24 @@ public static class HtmlTheory
 
     public static IHtmlDivElement CreateDiv(this IDocument document) => (IHtmlDivElement)document.CreateElement(TagNames.Div);
     public static IHtmlAnchorElement CreateA(this IDocument document) => (IHtmlAnchorElement)document.CreateElement(TagNames.A);
+
+    public static string Unescape(string htmlEscapedText)
+    {
+        return RegexTheory.GetHtmlEscapeRegex().Replace(htmlEscapedText, EvaluateMatch);
+
+        static string EvaluateMatch(Match match)
+        {
+            string key = match.Groups["Key"].Value.ToLowerInvariant();
+
+            return key switch
+            {
+                "lt" => "<",
+                "gt" => ">",
+                "amp" => "&",
+                "quot" => "\"",
+                _ => match.Value
+            };
+        }
+    }
 
 }

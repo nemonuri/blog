@@ -9,4 +9,7 @@ public static partial class RegexTheory
 
     [GeneratedRegex("""language-(?<LanguageName>.*)""", RegexOptions.ECMAScript | RegexOptions.IgnoreCase, "en-us")]
     public static partial Regex GetLanguageNameRegex();
+
+    [GeneratedRegex("""&(?<Key>[a-z]+);""", RegexOptions.ECMAScript | RegexOptions.IgnoreCase, "en-us")]
+    public static partial Regex GetHtmlEscapeRegex();
 }
