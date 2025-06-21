@@ -56,3 +56,51 @@ public static string ChangeExtension(string originalPath, string? extension)
     2. 아니라면,
         1. '원본 파일 경로'를 0번째부터 (`1.의 결과` - 1)번째까지 잘라낸다.
         2. `2.ii.a.의 결과`와 '새 확장자'를 연결하고, 그 결과를 반환한다.
+
+#### 사담
+
+사실 저 자연어 알고리즘도 썩 마음에 드는 건 아닌데...일단 저 정도로 할 수 있는 걸 목표로 하자.
+
+## 코드-자연어 알고리즘 대응시키기
+
+- 자연어 알고리즘의 각 줄이, 코드의 어떤 부분과 대응되는지, 코드와 주석으로 표현해보자.
+
+```csharp
+/// <param name="originalPath">원본 파일 경로</param>
+/// <param name="extension">교체할 새 확장자</param>
+public static string ChangeExtension(string originalPath, string? extension)
+{
+    // 1. '원본 파일 경로'에서 '.'의 마지막 위치를 얻는다.
+    int lastDotIndex = originalPath.LastIndexOf('.');
+
+    // 2. `1.의 결과`가 -1 과 같은지 확인한다.
+    if (lastDotIndex == -1)
+    {
+        // 1. 맞다면, '원본 파일 경로'와 '새 확장자'를 연결하고, 그 결과를 반환한다.
+        return string.Concat(originalPath, extension);
+    }
+    else
+    {
+        // 2. 아니라면,
+        // 1. '원본 파일 경로'를 0번째부터 (`1.의 결과` - 1)번째까지 잘라낸다.
+        var v1 = originalPath.AsSpan(0, lastDotIndex);
+        // 2. `2.ii.a.의 결과`와 '새 확장자'를 연결하고, 그 결과를 반환한다.
+        return string.Concat(v1, extension);
+    }
+}
+```
+
+### 일단은...
+
+저 '분리' 부터 구현해야 하려나.
+
+```csharp
+        return string.Concat(originalPath.AsSpan(0, lastDotIndex), extension);
+```
+↓
+```csharp
+        var v1 = originalPath.AsSpan(0, lastDotIndex);
+        return string.Concat(v1, extension);
+```
+
+이것 말고도, 분리해야 할 게 많겠지..
