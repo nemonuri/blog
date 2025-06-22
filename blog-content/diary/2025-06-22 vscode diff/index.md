@@ -21,6 +21,12 @@ code --diff <파일1> <파일2>
 
 ![image1](image/image1.png)
 
+## 명령 팔레트에서 실행하기
+
+![image2](image/image2.png)
+
+...아, 이미 명령 팔레트에 있었구나 ㅎ
+
 ## 참고자료
 
 - [영어 위키피디아/diff](https://en.wikipedia.org/wiki/Diff)
