@@ -104,3 +104,124 @@ public static string ChangeExtension(string originalPath, string? extension)
 ```
 
 이것 말고도, 분리해야 할 게 많겠지..
+
+## 구현
+
+- 코드를 주석 달기 좋은 형태로 고치는 걸 구현하는 데 성공했다.
+  - TODO: 프로젝트 디렉토리를, 접근성 좋은 오픈소스 저장소 형태로 만들어 공개하기
+
+### 예시 1
+
+- 입력
+
+```csharp
+    public static string ChangeExtension(string originalPath, string? extension)
+    {
+        int lastDotIndex = originalPath.LastIndexOf('.');
+        if (lastDotIndex == -1)
+        {
+            return string.Concat(originalPath, extension);
+        }
+        else
+        {
+            return string.Concat(originalPath.AsSpan(0, lastDotIndex), extension);
+        }
+    }
+```
+
+- 출력
+
+```csharp
+public static string ChangeExtension(string originalPath, string? extension)
+{
+    //
+    int lastDotIndex = originalPath.LastIndexOf('.');
+    //
+    bool b1_1 = lastDotIndex == -1;
+    if (b1_1)
+    {
+        //
+        return string.Concat(originalPath, extension);
+    }
+    else
+    {
+        //
+        var v2_1 = originalPath.AsSpan(0, lastDotIndex);
+        //
+        return string.Concat(v2_1, extension);
+    }
+}
+```
+
+### 예시 2
+
+- 입력
+
+```csharp
+using RoslynQuoter;
+
+namespace Nemonuri.RoslynQuoters;
+
+/// <summary>
+/// 프로그램
+/// </summary>
+public static class Program
+{
+    /// <summary>
+    /// 이 프로그램의 진입점입니다.
+    /// </summary>
+    /// <param name="args">명령어</param>
+    public static void Main(string[] args)
+    {
+        if (CommandParsingTheory.Parse(args) is not { } parseResult) { return; }
+
+        string csharpText = File.ReadAllText(parseResult.TargetFile.FullName);
+
+        Quoter quoter = new Quoter();
+        Quoter.ApiCall apiCall = quoter.Quote(csharpText);
+
+        Console.WriteLine(apiCall.ToString());
+    }
+}
+```
+
+- 출력
+
+```csharp
+using RoslynQuoter;
+
+namespace Nemonuri.RoslynQuoters;
+/// <summary>
+/// 프로그램
+/// </summary>
+public static class Program
+{
+    /// <summary>
+    /// 이 프로그램의 진입점입니다.
+    /// </summary>
+    /// <param name = "args">명령어</param>
+    public static void Main(string[] args)
+    {
+        //
+        bool b1_1 = CommandParsingTheory.Parse(args)is not { } parseResult;
+        if (b1_1)
+        {
+            //
+            return;
+        }
+
+        //
+        var v2_1 = parseResult.TargetFile.FullName;
+        //
+        string csharpText = File.ReadAllText(v2_1);
+        //
+        Quoter quoter = new Quoter();
+        //
+        Quoter.ApiCall apiCall = quoter.Quote(csharpText);
+        //
+        var v2_2 = apiCall.ToString();
+        //
+        Console.WriteLine(v2_2);
+    }
+}
+```
