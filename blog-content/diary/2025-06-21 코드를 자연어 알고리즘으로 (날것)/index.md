@@ -108,7 +108,7 @@ public static string ChangeExtension(string originalPath, string? extension)
 ## 코드 분리 기능 구현
 
 - 코드를 주석 달기 좋은 형태로 고치는 걸 구현하는 데 성공했다.
-  - TODO: 프로젝트 디렉토리를, 접근성 좋은 오픈소스 저장소 형태로 만들어 공개하기
+  - TODO-IDEA: 프로젝트 디렉토리를, 접근성 좋은 오픈소스 저장소 형태로 만들어 공개하기
 
 ### 예시 1
 
@@ -742,6 +742,133 @@ public static string M5(Span<char> v2_1, string extension)
   - **Step2.** '.'의 인덱스(**Step1.** 결과)로부터, '.'이 원본 파일 경로에 있는지 확인합니다.
     - **Step2.1.** 맞다면, 원본 파일 경로(**Param1.**)에서 확장자를 제외한 부분과 새 확장자(**Param2.**)를 결합하여 새로운 파일 경로를 생성합니다.
     - **Step2.2.** 아니라면,
-      - **Step2.2.1.** 원본 파일 경로에서 확장자를 제외한 부분을 가져옵니다.
+      - **Step2.2.1.** '.'의 인덱스(**Step1.** 결과)로부터, 원본 파일 경로(**Param1.**)에서 확장자를 제외한 부분을 가져옵니다.
       - **Step2.2.2.** 확장자를 제외한 부분과 새 확장자를 결합하여 새로운 파일 경로를 생성합니다.
 
+그런데, Step2.1.의 설명이 뭔가 이상하다? \
+Step2. 의 맞다·아니다 도 완전 반대야.
+
+LLM을 한번 더 실행해보자. 동일한 입력 프롬프트를 사용해서.
+- TODO-IDEA: 입력 프롬프트 중간에 수정사항 요청을 추가할 수 있게 하는 것도 좋을 것 같다.
+
+### 출력2
+
+```csharp
+/// <summary>
+/// 원본 파일 경로의 확장자를 새 것으로 교체합니다.
+/// </summary>
+/// <param name="originalPath">원본 파일 경로</param>
+/// <param name="extension">교체할 새 확장자</param>
+/// <returns>확장자가 교체된 파일 경로</returns>
+public static string ChangeExtension(string originalPath, string? extension)
+{
+    int lastDotIndex = M1(originalPath);
+    if (M2(lastDotIndex))
+    {
+        return M3(originalPath, extension);
+    }
+    else
+    {
+        Span<char> v2_1 = M4(originalPath, lastDotIndex);
+        return M5(v2_1, extension);
+    }
+}
+
+/// <summary>
+/// 원본 파일 경로에서 마지막 점의 인덱스를 반환합니다.
+/// </summary>
+/// <param name="originalPath">원본 파일 경로</param>
+/// <returns>마지막 점의 인덱스</returns>
+public static int M1(string originalPath)
+{
+    return originalPath.LastIndexOf('.');
+}
+
+/// <summary>
+/// 주어진 인덱스가 -1인지 확인합니다.
+/// </summary>
+/// <param name="lastDotIndex">점의 인덱스</param>
+/// <returns>점이 없으면 true, 있으면 false</returns>
+public static bool M2(int lastDotIndex)
+{
+    return lastDotIndex == -1;
+}
+
+/// <summary>
+/// 원본 파일 경로와 새 확장자를 결합하여 새로운 파일 경로를 반환합니다.
+/// </summary>
+/// <param name="originalPath">원본 파일 경로</param>
+/// <param name="extension">새 확장자</param>
+/// <returns>확장자가 교체된 파일 경로</returns>
+public static string M3(string originalPath, string extension)
+{
+    return string.Concat(originalPath, extension);
+}
+
+/// <summary>
+/// 원본 파일 경로에서 마지막 점까지의 부분을 Span<char>로 반환합니다.
+/// </summary>
+/// <param name="originalPath">원본 파일 경로</param>
+/// <param name="lastDotIndex">점의 인덱스</param>
+/// <returns>Span<char> 형태의 파일 경로 부분</returns>
+public static Span<char> M4(string originalPath, int lastDotIndex)
+{
+    return originalPath.AsSpan(0, lastDotIndex);
+}
+
+/// <summary>
+/// Span<char>와 새 확장자를 결합하여 새로운 파일 경로를 반환합니다.
+/// </summary>
+/// <param name="v2_1">Span<char> 형태의 파일 경로 부분</param>
+/// <param name="extension">새 확장자</param>
+/// <returns>확장자가 교체된 파일 경로</returns>
+public static string M5(Span<char> v2_1, string extension)
+{
+    return string.Concat(v2_1, extension);
+}
+```
+
+### 자연어 알고리즘 (출력2)
+
+#### ChangeExtension (단계 수정 전)
+
+- 요약
+  - 원본 파일 경로의 확장자를 새 것으로 교체합니다.
+- 반환
+  - 확장자가 교체된 파일 경로
+- 매개변수
+  - **Param1.** 원본 파일 경로
+  - **Param2.** 교체할 새 확장자
+- 단계
+  - **Step1.** 원본 파일 경로에서 마지막 점의 인덱스를 반환합니다.
+  - **Step2.** 주어진 인덱스가 -1인지 확인합니다.
+    - **Step2.1.** 맞다면, 원본 파일 경로와 새 확장자를 결합하여 새로운 파일 경로를 반환합니다.
+    - **Step2.2.** 아니라면,
+      - **Step2.2.1.** 원본 파일 경로에서 마지막 점까지의 부분을 Span\<char\>로 반환합니다.
+      - **Step2.2.2.** Span\<char\>와 새 확장자를 결합하여 새로운 파일 경로를 반환합니다.
+
+#### ChangeExtension (단계 수정 후)
+
+- 요약
+  - 원본 파일 경로의 확장자를 새 것으로 교체합니다.
+- 반환
+  - 확장자가 교체된 파일 경로
+- 매개변수
+  - **Param1.** 원본 파일 경로
+  - **Param2.** 교체할 새 확장자
+- 단계
+  - **Step1.** 원본 파일 경로(**Param1.**)에서 마지막 점의 인덱스를 반환합니다.
+  - **Step2.** 주어진 인덱스(**Step1.** 결과)가 -1인지 확인합니다.
+    - **Step2.1.** 맞다면, 
+      - **Step2.1.1.** 원본 파일 경로(**Param1.**)와 새 확장자(**Param2.**)를 결합하여 새로운 파일 경로를 반환합니다.
+      - **Step2.1.2.** '확장자가 교체된 파일 경로'(**Step2.1.1.** 결과)를 최종 반환하여 **단계를 종료**합니다.
+    - **Step2.2.** 아니라면,
+      - **Step2.2.1.** 점의 인덱스(**Step1.** 결과)로부터, 원본 파일 경로(**Param1.**)에서 마지막 점까지의 부분을 Span\<char\>로 반환합니다.
+      - **Step2.2.2.** Span\<char\> 형태의 파일 경로 부분(**Step2.2.1.** 결과)으로부터, Span\<char\>와 새 확장자(**Param2.**)를 결합하여 새로운 파일 경로를 반환합니다.
+      - **Step2.2.3.** '확장자가 교체된 파일 경로'(**Step2.2.3.** 결과)를 최종 반환하여 **단계를 종료**합니다.
+
+#### 사담
+
+- '반환'이라는 단어가 중복해서 쓰이는 게 마음에 걸리네. 적절한 표현인가?
+  - '최종 반환', '단계를 종료' - 음...이 표현이 최선인가? 왜 표현이 마음에 안 들지?
+- '단계' 보다는 '절차(procedure)' 라는 표현이, 더 좋지 않을까? 
