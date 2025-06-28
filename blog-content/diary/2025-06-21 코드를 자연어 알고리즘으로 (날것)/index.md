@@ -488,3 +488,237 @@ public static string ChangeExtension(string originalPath, string? extension)
   - LLM이 주석을 엄격한 형식과 함께 작성하게 할 방법은 없는가?
 
 - 답변2: 있다. '메서드'다! 각 줄의 Expression 을, 메서드로 감싸고, 각 메서드에 엄격한 형식을 가진 주석(`<summary>`)을 LLM에게 달게 하자!
+
+## 코드를 메서드로 감싸서 분리하기
+
+수작업으로 진행했다.
+
+- 분리 전
+
+```csharp
+    public static string ChangeExtension(string originalPath, string? extension)
+    {
+        int lastDotIndex = originalPath.LastIndexOf('.');
+        if (lastDotIndex == -1)
+        {
+            return string.Concat(originalPath, extension);
+        }
+        else
+        {
+            return string.Concat(originalPath.AsSpan(0, lastDotIndex), extension);
+        }
+    }
+```
+
+- 분리 후
+
+```csharp
+/// <summary>
+/// 원본 파일 경로의 확장자를 새 것으로 교체합니다.
+/// </summary>
+/// <param name = "originalPath">원본 파일 경로</param>
+/// <param name = "extension">교체할 새 확장자</param>
+/// <returns>확장자가 교체된 파일 경로</returns>
+public static string ChangeExtension(string originalPath, string? extension)
+{
+    int lastDotIndex = M1(originalPath);
+    if (M2(lastDotIndex))
+    {
+        return M3(originalPath, extension);
+    }
+    else
+    {
+        Span<char> v2_1 = M4(originalPath, lastDotIndex);
+        return M5(v2_1, extension);
+    }
+}
+
+public static int M1(string originalPath)
+{
+    return originalPath.LastIndexOf('.');
+}
+
+public static bool M2(int lastDotIndex)
+{
+    return lastDotIndex == -1;
+}
+
+public static string M3(string originalPath, string extension)
+{
+    return string.Concat(originalPath, extension);
+}
+
+public static Span<char> M4(string originalPath, int lastDotIndex)
+{
+    return originalPath.AsSpan(0, lastDotIndex);
+}
+
+public static string M5(Span<char> v2_1, string extension)
+{
+    return string.Concat(v2_1, extension);
+}
+```
+
+### 주석 달기
+
+- LLM을 이용해 주석을 달아보았다.
+  - 사용 모델: qwen2.5-coder:7b
+
+- 입력 프롬프트
+
+````
+<|im_start|>system
+You are a professional C# programmer.
+
+<RULE>
+1. Write `<summary>` style comment to each method, in Korean.
+</RULE>
+<|im_end|>
+<|im_start|>user
+
+```csharp
+/// <summary>
+/// 원본 파일 경로의 확장자를 새 것으로 교체합니다.
+/// </summary>
+/// <param name = "originalPath">원본 파일 경로</param>
+/// <param name = "extension">교체할 새 확장자</param>
+/// <returns>확장자가 교체된 파일 경로</returns>
+public static string ChangeExtension(string originalPath, string? extension)
+{
+    int lastDotIndex = M1(originalPath);
+    if (M2(lastDotIndex))
+    {
+        return M3(originalPath, extension);
+    }
+    else
+    {
+        Span<char> v2_1 = M4(originalPath, lastDotIndex);
+        return M5(v2_1, extension);
+    }
+}
+
+public static int M1(string originalPath)
+{
+    return originalPath.LastIndexOf('.');
+}
+
+public static bool M2(int lastDotIndex)
+{
+    return lastDotIndex == -1;
+}
+
+public static string M3(string originalPath, string extension)
+{
+    return string.Concat(originalPath, extension);
+}
+
+public static Span<char> M4(string originalPath, int lastDotIndex)
+{
+    return originalPath.AsSpan(0, lastDotIndex);
+}
+
+public static string M5(Span<char> v2_1, string extension)
+{
+    return string.Concat(v2_1, extension);
+}
+```
+
+<|im_end|>
+<|im_start|>assistant
+````
+
+- 출력
+
+```csharp
+/// <summary>
+/// 원본 파일 경로의 확장자를 새 것으로 교체합니다.
+/// </summary>
+/// <param name="originalPath">원본 파일 경로</param>
+/// <param name="extension">교체할 새 확장자</param>
+/// <returns>확장자가 교체된 파일 경로</returns>
+public static string ChangeExtension(string originalPath, string? extension)
+{
+    int lastDotIndex = M1(originalPath);
+    if (M2(lastDotIndex))
+    {
+        return M3(originalPath, extension);
+    }
+    else
+    {
+        Span<char> v2_1 = M4(originalPath, lastDotIndex);
+        return M5(v2_1, extension);
+    }
+}
+
+/// <summary>
+/// 원본 파일 경로에서 마지막에 있는 '.'의 인덱스를 반환합니다.
+/// </summary>
+/// <param name="originalPath">원본 파일 경로</param>
+/// <returns>'.'의 인덱스 또는 -1(확장자가 없는 경우)</returns>
+public static int M1(string originalPath)
+{
+    return originalPath.LastIndexOf('.');
+}
+
+/// <summary>
+/// '.'이 원본 파일 경로에 있는지 확인합니다.
+/// </summary>
+/// <param name="lastDotIndex">'.'의 인덱스</param>
+/// <returns>확장자가 없는 경우 true, 그렇지 않으면 false</returns>
+public static bool M2(int lastDotIndex)
+{
+    return lastDotIndex == -1;
+}
+
+/// <summary>
+/// 원본 파일 경로에서 확장자를 제외한 부분과 새 확장자를 결합하여 새로운 파일 경로를 생성합니다.
+/// </summary>
+/// <param name="originalPath">원본 파일 경로</param>
+/// <param name="extension">교체할 새 확장자</param>
+/// <returns>확장자가 교체된 파일 경로</returns>
+public static string M3(string originalPath, string extension)
+{
+    return string.Concat(originalPath, extension);
+}
+
+/// <summary>
+/// 원본 파일 경로에서 확장자를 제외한 부분을 가져옵니다.
+/// </summary>
+/// <param name="originalPath">원본 파일 경로</param>
+/// <param name="lastDotIndex">'.'의 인덱스</param>
+/// <returns>확장자를 제외한 부분의 Span<char></returns>
+public static Span<char> M4(string originalPath, int lastDotIndex)
+{
+    return originalPath.AsSpan(0, lastDotIndex);
+}
+
+/// <summary>
+/// 확장자를 제외한 부분과 새 확장자를 결합하여 새로운 파일 경로를 생성합니다.
+/// </summary>
+/// <param name="v2_1">확장자를 제외한 부분의 Span<char></param>
+/// <param name="extension">교체할 새 확장자</param>
+/// <returns>확장자가 교체된 파일 경로</returns>
+public static string M5(Span<char> v2_1, string extension)
+{
+    return string.Concat(v2_1, extension);
+}
+```
+
+### 자연어 알고리즘
+
+#### ChangeExtension
+
+- 요약
+  - 원본 파일 경로의 확장자를 새 것으로 교체합니다.
+- 반환
+  - 확장자가 교체된 파일 경로
+- 매개변수
+  - **Param1.** 원본 파일 경로
+  - **Param2.** 교체할 새 확장자
+- 단계
+  - **Step1.** 원본 파일 경로에서 마지막에 있는 '.'의 인덱스를 반환합니다.
+  - **Step2.** '.'이 원본 파일 경로에 있는지 확인합니다.
+    - **Step2.1.** 맞다면, 원본 파일 경로에서 확장자를 제외한 부분과 새 확장자를 결합하여 새로운 파일 경로를 생성합니다.
+    - **Step2.2.** 아니라면,
+      - **Step2.2.1.** 원본 파일 경로에서 확장자를 제외한 부분을 가져옵니다.
+      - **Step2.2.2.** 확장자를 제외한 부분과 새 확장자를 결합하여 새로운 파일 경로를 생성합니다.
