@@ -105,7 +105,7 @@ public static string ChangeExtension(string originalPath, string? extension)
 
 이것 말고도, 분리해야 할 게 많겠지..
 
-## 구현
+## 코드 분리 기능 구현
 
 - 코드를 주석 달기 좋은 형태로 고치는 걸 구현하는 데 성공했다.
   - TODO: 프로젝트 디렉토리를, 접근성 좋은 오픈소스 저장소 형태로 만들어 공개하기
@@ -225,3 +225,266 @@ public static class Program
     }
 }
 ```
+
+## 분리된 코드에 주석 달기
+
+- LLM을 이용해 주석을 달아보았다.
+  - 사용 모델: qwen2.5-coder:7b
+
+### 예시1
+
+- 입력 프롬프트
+
+```
+<|im_start|>system
+You are a professional senior C# programmer.
+
+<RULE>
+1. Add a comment as sentence in Korean for each code line of the given method name.
+2. User will input code in <CODE/> block, and method name in <METHOD_NAME/> block.
+</RULE>
+<|im_end|>
+<|im_start|>user
+<CODE>
+/// <summary>
+/// 원본 파일 경로의 확장자를 새 것으로 교체합니다.
+/// </summary>
+/// <param name = "originalPath">원본 파일 경로</param>
+/// <param name = "extension">교체할 새 확장자</param>
+/// <returns>확장자가 교체된 파일 경로</returns>
+public static string ChangeExtension(string originalPath, string? extension)
+{
+    //
+    int lastDotIndex = originalPath.LastIndexOf('.');
+    //
+    bool b1_1 = lastDotIndex == -1;
+    if (b1_1)
+    {
+        //
+        return string.Concat(originalPath, extension);
+    }
+    else
+    {
+        //
+        var v2_1 = originalPath.AsSpan(0, lastDotIndex);
+        //
+        return string.Concat(v2_1, extension);
+    }
+}
+</CODE>
+
+<METHOD_NAME>
+ChangeExtension
+</METHOD_NAME>
+<|im_end|>
+<|im_start|>assistant
+```
+
+- 출력
+
+```csharp
+/// <summary>
+/// 원본 파일 경로의 확장자를 새 것으로 교체합니다.
+/// </summary>
+/// <param name="originalPath">원본 파일 경로</param>
+/// <param name="extension">교체할 새 확장자</param>
+/// <returns>확장자가 교체된 파일 경로</returns>
+public static string ChangeExtension(string originalPath, string? extension)
+{
+    // 원본 파일 경로에서 마지막 '.' 인덱스를 찾습니다.
+    int lastDotIndex = originalPath.LastIndexOf('.');
+    
+    // 만약 '.'이 없다면 확장자를 추가합니다.
+    bool b1_1 = lastDotIndex == -1;
+    if (b1_1)
+    {
+        // 원본 파일 경로에 새 확장자를 연결하여 반환합니다.
+        return string.Concat(originalPath, extension);
+    }
+    else
+    {
+        // '.'이 있다면 '.' 전까지의 부분을 가져옵니다.
+        var v2_1 = originalPath.AsSpan(0, lastDotIndex);
+        
+        // 원본 파일 경로에서 확장자를 제거한 후 새 확장자를 추가하여 반환합니다.
+        return string.Concat(v2_1, extension);
+    }
+}
+```
+
+### 예시2
+
+- 입력 프롬프트
+
+```
+<|im_start|>system
+You are a professional senior C# programmer.
+
+<RULE>
+1. Add a comment as sentence in Korean for each code line of the given method name.
+2. User will input code in <CODE/> block, and method name in <METHOD_NAME/> block.
+</RULE>
+<|im_end|>
+<|im_start|>user
+<CODE>
+using RoslynQuoter;
+
+
+/// <summary>
+/// 프로그램
+/// </summary>
+public static class Program
+{
+    /// <summary>
+    /// 이 프로그램의 진입점입니다.
+    /// </summary>
+    /// <param name = "args">명령어</param>
+    public static void Main(string[] args)
+    {
+        //
+        bool b1_1 = CommandParsingTheory.Parse(args)is not { } parseResult;
+        if (b1_1)
+        {
+            //
+            return;
+        }
+
+        //
+        var v2_1 = parseResult.TargetFile.FullName;
+        //
+        string csharpText = File.ReadAllText(v2_1);
+        //
+        Quoter quoter = new Quoter();
+        //
+        Quoter.ApiCall apiCall = quoter.Quote(csharpText);
+        //
+        var v2_2 = apiCall.ToString();
+        //
+        Console.WriteLine(v2_2);
+    }
+}
+</CODE>
+
+<METHOD_NAME>
+Main
+</METHOD_NAME>
+<|im_end|>
+<|im_start|>assistant
+```
+
+- 출력
+
+```csharp
+using RoslynQuoter;
+
+/// <summary>
+/// 프로그램
+/// </summary>
+public static class Program
+{
+    /// <summary>
+    /// 이 프로그램의 진입점입니다.
+    /// </summary>
+    /// <param name = "args">명령어</param>
+    public static void Main(string[] args)
+    {
+        // 명령어를 파싱하여 결과가 없는지 확인합니다. 결과가 있으면 true, 없으면 false
+        bool b1_1 = CommandParsingTheory.Parse(args)is not { } parseResult;
+        if (b1_1)
+        {
+            // 파싱된 결과가 없는 경우 메서드를 종료합니다.
+            return;
+        }
+
+        // 파싱된 결과에서 대상 파일의 전체 경로를 가져옵니다.
+        var v2_1 = parseResult.TargetFile.FullName;
+        
+        // 해당 경로에 있는 C# 텍스트를 읽어옵니다.
+        string csharpText = File.ReadAllText(v2_1);
+
+        // RoslynQuoter를 사용하여 C# 코드를 변환합니다.
+        Quoter quoter = new Quoter();
+        Quoter.ApiCall apiCall = quoter.Quote(csharpText);
+
+        // 변환된 결과를 문자열로 변환합니다.
+        var v2_2 = apiCall.ToString();
+
+        // 변환된 결과를 콘솔에 출력합니다.
+        Console.WriteLine(v2_2);
+    }
+}
+```
+
+## 주석 달린 코드를 자연어 알고리즘으로
+
+일단, 예시 1만 해보자. 수작업으로.
+
+### 주석 달린 코드
+
+```csharp
+/// <summary>
+/// 원본 파일 경로의 확장자를 새 것으로 교체합니다.
+/// </summary>
+/// <param name="originalPath">원본 파일 경로</param>
+/// <param name="extension">교체할 새 확장자</param>
+/// <returns>확장자가 교체된 파일 경로</returns>
+public static string ChangeExtension(string originalPath, string? extension)
+{
+    // 원본 파일 경로에서 마지막 '.' 인덱스를 찾습니다.
+    int lastDotIndex = originalPath.LastIndexOf('.');
+    
+    // 만약 '.'이 없다면 확장자를 추가합니다.
+    bool b1_1 = lastDotIndex == -1;
+    if (b1_1)
+    {
+        // 원본 파일 경로에 새 확장자를 연결하여 반환합니다.
+        return string.Concat(originalPath, extension);
+    }
+    else
+    {
+        // '.'이 있다면 '.' 전까지의 부분을 가져옵니다.
+        var v2_1 = originalPath.AsSpan(0, lastDotIndex);
+        
+        // 원본 파일 경로에서 확장자를 제거한 후 새 확장자를 추가하여 반환합니다.
+        return string.Concat(v2_1, extension);
+    }
+}
+```
+
+### 자연어 알고리즘
+
+#### ChangeExtension
+
+- 요약
+  - 원본 파일 경로의 확장자를 새 것으로 교체합니다.
+- 반환
+  - 확장자가 교체된 파일 경로
+- 매개변수
+  - **Param1.** 원본 파일 경로
+  - **Param2.** 교체할 새 확장자
+- 단계
+  - **Step1.** 원본 파일 경로에서 마지막 '.' 인덱스를 찾습니다.
+  - **Step2.** 만약 '.'이 없다면 확장자를 추가합니다.
+    - **Step2.1.** 맞다면, 원본 파일 경로에 새 확장자를 연결하여 반환합니다.
+    - **Step2.2.** 아니라면,
+      - **Step2.2.1.** '.'이 있다면 '.' 전까지의 부분을 가져옵니다.
+      - **Step2.2.2.** 원본 파일 경로에서 확장자를 제거한 후 새 확장자를 추가하여 반환합니다.
+
+### 자문자답
+
+- 질문1: 결과가 마음에 드는가? 아니라면, 그 이유는 무엇인가?
+
+- 답변1
+  - 결과, 마음에 안 든다.
+  1. 뭘 하자는 건 지 알 수 없다. 자연어 알고리즘이, 인간이 읽고 이해할 수 있는 문서가 아니다.
+  2. **Step2.** 에서 **Step2.1.** 또는 **Step2.2.** 으로 연결되는 것이 너무 어색하다. 둘 다 **Step2.**와 연결되는 문장이 아니다.
+     - **Step2.**의 동사가 '확인합니다' 여야 자연스럽다.
+  3. 각 **Step**이 무엇을 의미하는지 모르겠다. 애매하다.
+     - 무엇무엇을 입력받아, 무슨 작업을 수행하는지, 그 의미가 느껴지지 않는다.
+     - 정말 평균적인 느낌의 주석이다. 자세함이 엄청 많이 뭉개진 주석.
+
+- 질문2
+  - 답변1 에서 명세한 문제들의 원인은, 사람들이 한 줄 짜리 주석은 보통 엄격한 형식 없이 간단하게 작성하기 때문인 것으로 생각된다.
+  - LLM이 주석을 엄격한 형식과 함께 작성하게 할 방법은 없는가?
+
+- 답변2: 있다. '메서드'다! 각 줄의 Expression 을, 메서드로 감싸고, 각 메서드에 엄격한 형식을 가진 주석(`<summary>`)을 LLM에게 달게 하자!
