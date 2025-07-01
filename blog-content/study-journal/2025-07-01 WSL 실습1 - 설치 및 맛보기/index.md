@@ -1,5 +1,6 @@
 ---
 alias: wsl-practice1-install-and-taste
+subindex: 1
 ---
 
 # WSL 실습1 - 설치 및 맛보기
