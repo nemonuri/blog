@@ -1,6 +1,5 @@
 ---
-alias: argument-expression-extract-and-rewriting-
-implemented-what-should-i-do-next
+alias: argument-expression-extract-and-rewriting-implemented-what-should-i-do-next
 ---
 
 # Argument Expression 분리 기능 구현 (이제 뭐 하지)
