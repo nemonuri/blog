@@ -123,3 +123,19 @@ alias: request-unemployment-benefits
 
 - 그냥 켜놓기만 하고 딴짓하는 거 방지까지!
 
+### 구직급여 수급요건
+
+![image12](image/image12.png)
+
+- 어...'지금 재취업 생각이 없어요' 하면 안 된다고...??
+
+![alt text](image/image13.png)
+
+- 아 ㅋㅋㅋㅋ 쉬는 기간 아니었냐고
+  - 자격증이나 인터넷 학위 공부 기록 같은 것, 올리면 되나?
+
+![alt text](image/image14.png)
+
+- 그 다음은, 이직확인서 신고 여부. ...이건 또 뭐냐?
+
+(작성중)
