@@ -140,3 +140,13 @@ alias: request-unemployment-benefits
 - 그냥 회사 인사담당자에게 '실업급여를 위해 이직확인서 제출 부탁드립니다' 요청하니까, 며칠 후에 알아서 정부에 보내주셨다....
   - 그리고 게으름 피우는 동안, 시간이 많이 지나 온라인 동영상 교육을 다시 들어야 한다...하하.
   - ![alt text](image/image15.png)
+
+## 수급자격 신청서 제출
+
+![alt text](image/image16.png)
+
+- 관할 고용센터 방문!
+
+![alt text](image/image17.png)
+
+- '방문 예정일'이, 실업급여 **신청**일!
